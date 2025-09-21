@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SleepShaker</string>
+    <string name="wake_up">WAKE UP!</string>
+    <string name="set_alarm">Set Alarm</string>
+</resources>
