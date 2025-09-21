@@ -6,6 +6,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.IBinder;
+import android.util.Log;
 
 public class RingtonePlayingService extends Service {
     private Ringtone ringtone;

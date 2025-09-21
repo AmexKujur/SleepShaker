@@ -15,9 +15,11 @@ public class AlarmItem {
     public long timeInMillis;
     public int hour;
     public int minute;
-    public String message; // Changed from 'label'
+    public String message;
     public boolean isEnabled;
-    public Set<Integer> repeatDays; // Changed from 'repeatingDays'
+    public Set<Integer> repeatDays;
+
+    // This is the missing field
     public String dismissMethod;
 
     // Default constructor for Room
@@ -32,17 +34,5 @@ public class AlarmItem {
         this.isEnabled = isEnabled;
         this.repeatDays = repeatDays;
         this.dismissMethod = dismissMethod;
-    }
-
-    // Copy constructor to help with setting the ID after insertion
-    public AlarmItem(AlarmItem other, int newId) {
-        this.id = newId;
-        this.timeInMillis = other.timeInMillis;
-        this.hour = other.hour;
-        this.minute = other.minute;
-        this.message = other.message;
-        this.isEnabled = other.isEnabled;
-        this.repeatDays = other.repeatDays;
-        this.dismissMethod = other.dismissMethod;
     }
 }
