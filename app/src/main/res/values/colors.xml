@@ -10,5 +10,9 @@
     <color name="text_purple_light">#9292c9</color>
     <color name="chip_day_background">#333366</color> <!-- Added -->
     <color name="chip_day_text">#FFFFFFFF</color> <!-- Added -->
-    <color name="toggle_ampm_text">#FFFFFFFF</color> <!-- Defaulting to white, adjust if needed -->
+    <color name="primary_text">#FFFFFFFF</color>
+
+    <color name="primary_indigo_dark">#0D0D8F</color>
+
+    <color name="dark_blue_grey_background">#FF37474F</color>
 </resources>

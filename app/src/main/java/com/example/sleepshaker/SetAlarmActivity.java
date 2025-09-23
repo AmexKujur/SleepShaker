@@ -1,8 +1,14 @@
-package com.example.sleepshaker.viewmodels;
+package com.example.sleepshaker;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.widget.RadioGroup;
+import android.widget.TimePicker;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.sleepshaker.viewmodels.SetAlarmViewModel;
 import com.example.sleepshaker.viewmodels.SetAlarmViewModelFactory;
@@ -10,30 +16,24 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import android.widget.NumberPicker;
-import android.widget.RadioGroup;
-import java.util.Arrays;
+
 import java.util.Calendar;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SetAlarmActivity extends AppCompatActivity {
 
-    // Views from your activity_set_alarm.xml
-    private NumberPicker hourPicker, minutePicker;
-    private RadioGroup amPmGroup;
+    // --- UPDATED: Views to match the new layout ---
+    private TimePicker timePicker;
     private SwitchMaterial dailySwitch;
     private ChipGroup dayChipGroup;
-    private List<Chip> dayChips;
+    private RadioGroup dismissOptionsRadioGroup;
     private MaterialButton saveAlarmButton;
+    private Toolbar toolbar;
 
     private SetAlarmViewModel viewModel;
-    private boolean isDailySwitchUpdatingChips = false;
-    private boolean isChipUpdatingDailySwitch = false;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -41,161 +41,132 @@ public class SetAlarmActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_alarm);
 
-        // Initialize ViewModel
         AlarmRepository repository = new AlarmRepository(getApplication());
         AlarmScheduler scheduler = new AlarmScheduler(this);
         SetAlarmViewModelFactory factory = new SetAlarmViewModelFactory(repository, scheduler);
         viewModel = new ViewModelProvider(this, factory).get(SetAlarmViewModel.class);
 
         initializeViews();
-
-        // Setup UI components and listeners
-        findViewById(R.id.backButton).setOnClickListener(v -> finish());
-        setupTimePickers();
         setupDaySelectionLogic();
         saveAlarmButton.setOnClickListener(v -> saveAlarm());
+
+        // --- UPDATED: Toolbar back button logic ---
+        toolbar.setNavigationOnClickListener(v -> finish());
     }
 
     private void initializeViews() {
-        hourPicker = findViewById(R.id.hourPicker);
-        minutePicker = findViewById(R.id.minutePicker);
-        amPmGroup = findViewById(R.id.amPmGroup);
+        // --- UPDATED: Finding the new views by their ID ---
+        toolbar = findViewById(R.id.toolbar);
+        timePicker = findViewById(R.id.timePicker);
         dailySwitch = findViewById(R.id.dailySwitch);
         dayChipGroup = findViewById(R.id.dayChipGroup);
+        dismissOptionsRadioGroup = findViewById(R.id.dismissOptionsRadioGroup);
         saveAlarmButton = findViewById(R.id.saveAlarmButton);
-        dayChips = Arrays.asList(
-                findViewById(R.id.chipSunday), findViewById(R.id.chipMonday),
-                findViewById(R.id.chipTuesday), findViewById(R.id.chipWednesday),
-                findViewById(R.id.chipThursday), findViewById(R.id.chipFriday),
-                findViewById(R.id.chipSaturday)
-        );
-    }
 
-    private void setupTimePickers() {
-        hourPicker.setMinValue(1);
-        hourPicker.setMaxValue(12);
-        hourPicker.setFormatter(value -> String.format(Locale.getDefault(), "%02d", value));
-
-        minutePicker.setMinValue(0);
-        minutePicker.setMaxValue(59);
-        minutePicker.setFormatter(value -> String.format(Locale.getDefault(), "%02d", value));
-
-        Calendar calendar = Calendar.getInstance();
-        int currentHour24 = calendar.get(Calendar.HOUR_OF_DAY);
-        int currentMinute = calendar.get(Calendar.MINUTE);
-
-        int currentHour12 = (currentHour24 == 0 || currentHour24 == 12) ? 12 : currentHour24 % 12;
-        hourPicker.setValue(currentHour12);
-        minutePicker.setValue(currentMinute);
-
-        if (currentHour24 < 12) {
-            amPmGroup.check(R.id.amButton);
-        } else {
-            amPmGroup.check(R.id.pmButton);
-        }
+        timePicker.setIs24HourView(false); // Use AM/PM format
     }
 
     private void setupDaySelectionLogic() {
+        final boolean[] isUpdating = {false};
+
+        // --- UPDATED: Using the 'dailySwitch' variable ---
         dailySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isDailySwitchUpdatingChips) return;
-            isChipUpdatingDailySwitch = true;
-            for (Chip chip : dayChips) {
-                chip.setChecked(isChecked);
+            if (!isUpdating[0]) {
+                isUpdating[0] = true;
+                for (int i = 0; i < dayChipGroup.getChildCount(); i++) {
+                    Chip chip = (Chip) dayChipGroup.getChildAt(i);
+                    chip.setChecked(isChecked);
+                }
+                isUpdating[0] = false;
             }
-            isChipUpdatingDailySwitch = false;
         });
 
-        for (Chip chip : dayChips) {
-            chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChipUpdatingDailySwitch) return;
-                isDailySwitchUpdatingChips = true;
-                boolean allChecked = true;
-                for (Chip innerChip : dayChips) {
-                    if (!innerChip.isChecked()) {
-                        allChecked = false;
-                        break;
-                    }
-                }
+        dayChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (!isUpdating[0]) {
+                isUpdating[0] = true;
+                boolean allChecked = group.getCheckedChipIds().size() == 7;
                 dailySwitch.setChecked(allChecked);
-                isDailySwitchUpdatingChips = false;
-            });
-        }
+                isUpdating[0] = false;
+            }
+        });
     }
 
     private void saveAlarm() {
-        // Reads values from the NumberPickers
-        int hour12 = hourPicker.getValue();
-        int minute = minutePicker.getValue();
-        boolean isPm = amPmGroup.getCheckedRadioButtonId() == R.id.pmButton;
-
-        int hour24 = hour12;
-        if (isPm && hour12 < 12) {
-            hour24 = hour12 + 12;
-        } else if (!isPm && hour12 == 12) { // 12 AM is 00:00
-            hour24 = 0;
-        }
+        // --- UPDATED: Get time from the new TimePicker ---
+        int hour = timePicker.getHour(); // 24-hour format
+        int minute = timePicker.getMinute();
 
         Set<Integer> selectedDays = new HashSet<>();
-        // ... Logic to populate selectedDays from chips ...
+        for (int id : dayChipGroup.getCheckedChipIds()) {
+            Chip chip = dayChipGroup.findViewById(id);
+            int dayIndex = dayChipGroup.indexOfChild(chip);
+            selectedDays.add(dayIndex + 1); // Calendar.SUNDAY = 1, etc.
+        }
 
-        boolean isDailyChecked = dailySwitch.isChecked();
-        boolean isRecurring = !selectedDays.isEmpty() || isDailyChecked;
-
-        Calendar calendar = calculateNextAlarmTime(hour24, minute, isRecurring, isDailyChecked, selectedDays);
+        String selectedChallenge;
+        int selectedId = dismissOptionsRadioGroup.getCheckedRadioButtonId();
+        // --- UPDATED: IDs match the new layout ---
+        if (selectedId == R.id.mathOption) {
+            selectedChallenge = "MATH";
+        } else if (selectedId == R.id.lightOption) {
+            selectedChallenge = "LUX_CHALLENGE";
+        } else {
+            selectedChallenge = "SHAKE";
+        }
 
         AlarmItem alarmItem = new AlarmItem();
-        alarmItem.timeInMillis = calendar.getTimeInMillis();
-        alarmItem.hour = hour24;
+        alarmItem.hour = hour;
         alarmItem.minute = minute;
-        // ... Populate other fields for the AlarmItem ...
+        alarmItem.isEnabled = true;
+        alarmItem.repeatDays = selectedDays;
+        alarmItem.dismissMethod = selectedChallenge;
+        alarmItem.message = ""; // Label input was removed from layout
+
+        boolean isRecurring = !selectedDays.isEmpty();
+        Calendar alarmTimeCalendar = calculateNextAlarmTime(hour, minute, isRecurring, selectedDays);
+        alarmItem.timeInMillis = alarmTimeCalendar.getTimeInMillis();
 
         executor.execute(() -> {
-            long id = viewModel.insert(alarmItem);
-            alarmItem.id = (int) id;
-            viewModel.schedule(alarmItem);
-        });
+            try {
+                long newId = viewModel.insert(alarmItem);
+                alarmItem.id = (int) newId;
 
-        Toast.makeText(this, "Alarm saved!", Toast.LENGTH_SHORT).show();
-        finish();
+                if (alarmItem.isEnabled) {
+                    viewModel.schedule(alarmItem);
+                }
+
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    Toast.makeText(SetAlarmActivity.this, "Alarm saved", Toast.LENGTH_SHORT).show();
+                    finish();
+                });
+
+            } catch (Exception e) {
+                Log.e("SetAlarmActivity", "Error while saving alarm!", e);
+            }
+        });
     }
 
-    private Calendar calculateNextAlarmTime(int hour, int minute, boolean isRecurring, boolean isDaily, Set<Integer> selectedDays) {
+    private Calendar calculateNextAlarmTime(int hour, int minute, boolean isRecurring, Set<Integer> selectedDays) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        if (!isRecurring) {
-            if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
-                calendar.add(Calendar.DAY_OF_YEAR, 1);
-            }
-            return calendar;
-        }
-
-        if (isDaily) {
-            if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
-                calendar.add(Calendar.DAY_OF_YEAR, 1);
-            }
-            return calendar;
-        }
-
-        for (int i = 0; i < 8; i++) {
-            int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-            if (selectedDays.contains(dayOfWeek) && calendar.getTimeInMillis() > System.currentTimeMillis()) {
-                return calendar;
-            }
+        if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
             calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
 
+        if (!isRecurring) {
+            return calendar;
+        }
+
+        while (!selectedDays.contains(calendar.get(Calendar.DAY_OF_WEEK))) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
         return calendar;
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (executor != null) {
-            executor.shutdown();
-        }
-    }
+    // No need for onDestroy if you are just using a single thread executor like this,
+    // as it will be garbage collected with the Activity.
 }
