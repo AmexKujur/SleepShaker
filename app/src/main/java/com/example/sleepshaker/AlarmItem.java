@@ -22,6 +22,7 @@ public class AlarmItem {
     // This is the missing field
     public String dismissMethod;
 
+
     // Default constructor for Room
     public AlarmItem() {}
 
@@ -34,5 +35,6 @@ public class AlarmItem {
         this.isEnabled = isEnabled;
         this.repeatDays = repeatDays;
         this.dismissMethod = dismissMethod;
+
     }
 }

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SleepShaker</string>
     <string name="wake_up">WAKE UP!</string>
-
+    <string name="back_button_description">Back</string>
     <string name="set_alarm">Set Alarm</string>
     <string-array name="dismiss_options">
         <item>Shake Phone</item>
