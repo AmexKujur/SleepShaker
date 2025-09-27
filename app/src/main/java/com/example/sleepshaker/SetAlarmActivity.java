@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.NumberPicker;
 import android.widget.RadioGroup;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -26,6 +27,9 @@ import java.util.concurrent.Executors;
 public class SetAlarmActivity extends AppCompatActivity {
 
     // --- UPDATED: Views to match the new layout ---
+    private NumberPicker hourPicker;
+    private NumberPicker minutePicker;
+    private RadioGroup amPmGroup;
     private TimePicker timePicker;
     private SwitchMaterial dailySwitch;
     private ChipGroup dayChipGroup;
@@ -50,6 +54,7 @@ public class SetAlarmActivity extends AppCompatActivity {
         setupDaySelectionLogic();
         saveAlarmButton.setOnClickListener(v -> saveAlarm());
 
+
         // --- UPDATED: Toolbar back button logic ---
         toolbar.setNavigationOnClickListener(v -> finish());
     }
@@ -57,13 +62,22 @@ public class SetAlarmActivity extends AppCompatActivity {
     private void initializeViews() {
         // --- UPDATED: Finding the new views by their ID ---
         toolbar = findViewById(R.id.toolbar);
-        timePicker = findViewById(R.id.timePicker);
+        //timePicker = findViewById(R.id.timePicker);
+        hourPicker = findViewById(R.id.hourPicker);
+        minutePicker = findViewById(R.id.minutePicker);
+        amPmGroup = findViewById(R.id.amPmGroup);
         dailySwitch = findViewById(R.id.dailySwitch);
         dayChipGroup = findViewById(R.id.dayChipGroup);
         dismissOptionsRadioGroup = findViewById(R.id.dismissOptionsRadioGroup);
         saveAlarmButton = findViewById(R.id.saveAlarmButton);
+        hourPicker.setMinValue(1);
+        hourPicker.setMaxValue(12);
 
-        timePicker.setIs24HourView(false); // Use AM/PM format
+        minutePicker.setMinValue(0);
+        minutePicker.setMaxValue(59);
+        minutePicker.setFormatter(i -> String.format("%02d", i));
+
+
     }
 
     private void setupDaySelectionLogic() {
@@ -93,8 +107,17 @@ public class SetAlarmActivity extends AppCompatActivity {
 
     private void saveAlarm() {
         // --- UPDATED: Get time from the new TimePicker ---
-        int hour = timePicker.getHour(); // 24-hour format
-        int minute = timePicker.getMinute();
+        //int hour = timePicker.getHour(); // 24-hour format
+        int hour12 = hourPicker.getValue();
+        int minute = minutePicker.getValue();
+        boolean isPm = amPmGroup.getCheckedRadioButtonId() == R.id.pmButton;
+        int hour24;
+
+        if (hour12 == 12) {
+            hour24 = isPm ? 12 : 0; // 12 PM is 12, 12 AM is 0
+        } else {
+            hour24 = isPm ? hour12 + 12 : hour12; // 1 PM is 13, etc.
+        }
 
         Set<Integer> selectedDays = new HashSet<>();
         for (int id : dayChipGroup.getCheckedChipIds()) {
@@ -115,7 +138,7 @@ public class SetAlarmActivity extends AppCompatActivity {
         }
 
         AlarmItem alarmItem = new AlarmItem();
-        alarmItem.hour = hour;
+        alarmItem.hour = hour12;
         alarmItem.minute = minute;
         alarmItem.isEnabled = true;
         alarmItem.repeatDays = selectedDays;
@@ -123,9 +146,9 @@ public class SetAlarmActivity extends AppCompatActivity {
         alarmItem.message = ""; // Label input was removed from layout
 
         boolean isRecurring = !selectedDays.isEmpty();
-        Calendar alarmTimeCalendar = calculateNextAlarmTime(hour, minute, isRecurring, selectedDays);
+        Calendar alarmTimeCalendar = calculateNextAlarmTime(hour24, minute, isRecurring, selectedDays);
         alarmItem.timeInMillis = alarmTimeCalendar.getTimeInMillis();
-
+        Log.d("AlarmDebug", "Scheduling alarm for: " + alarmTimeCalendar.getTime().toString());
         executor.execute(() -> {
             try {
                 long newId = viewModel.insert(alarmItem);
@@ -143,6 +166,8 @@ public class SetAlarmActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e("SetAlarmActivity", "Error while saving alarm!", e);
             }
+
+
         });
     }
 
