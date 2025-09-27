@@ -49,12 +49,63 @@
             android:orientation="vertical"
             android:paddingHorizontal="24dp">
 
-            <TimePicker
-                android:id="@+id/timePicker"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:timePickerMode="spinner"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingVertical="32dp">
+
+                <NumberPicker
+                    android:id="@+id/hourPicker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:theme="@style/NumberPickerTheme" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=":"
+                    android:textColor="@android:color/white"
+                    android:textSize="48sp"
+                    android:textStyle="bold" />
+
+                <NumberPicker
+                    android:id="@+id/minutePicker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:theme="@style/NumberPickerTheme" />
+
+                <RadioGroup
+                    android:id="@+id/amPmGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/amButton"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:background="@drawable/selector_ampm_background"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:text="AM"
+                        android:textColor="@color/toggle_ampm_text" />
+
+                    <RadioButton
+                        android:id="@+id/pmButton"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/selector_ampm_background"
+                        android:button="@null"
+                        android:checked="true"
+                        android:gravity="center"
+                        android:text="PM"
+                        android:textColor="@color/toggle_ampm_text" />
+                </RadioGroup>
+            </LinearLayout>
 
             <TextView
                 style="@style/SectionHeader"
@@ -102,37 +153,37 @@
                     style="@style/DayChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="S" />
+                    android:text="Sun" />
                 <com.google.android.material.chip.Chip
                     style="@style/DayChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="M" />
+                    android:text="Mon" />
                 <com.google.android.material.chip.Chip
                     style="@style/DayChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="T" />
+                    android:text="Tue" />
                 <com.google.android.material.chip.Chip
                     style="@style/DayChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="W" />
+                    android:text="Wed" />
                 <com.google.android.material.chip.Chip
                     style="@style/DayChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="T" />
+                    android:text="Thu" />
                 <com.google.android.material.chip.Chip
                     style="@style/DayChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="F" />
+                    android:text="Fri" />
                 <com.google.android.material.chip.Chip
                     style="@style/DayChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="S" />
+                    android:text="Sat" />
             </com.google.android.material.chip.ChipGroup>
 
             <TextView
@@ -144,86 +195,41 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <RelativeLayout
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/shakeOption"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="12dp">
-                    <ImageView
-                        android:id="@+id/iconShake"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_vibration"
-                        app:tint="@color/text_purple_light" />
-                    <TextView
-                        style="@style/CardText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="16dp"
-                        android:layout_toEndOf="@id/iconShake"
-                        android:text="Shake Phone" />
-                    <RadioButton
-                        android:id="@+id/shakeOption"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true" />
-                </RelativeLayout>
+                    android:text="Shake Phone"
+                    android:checked="true" android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    style="@style/CardText"
+                    android:drawableStart="@drawable/ic_vibration"
+                    android:drawablePadding="16dp"
+                    app:drawableTint="@color/text_purple_light" />
 
-                <RelativeLayout
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/mathOption"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="12dp">
-                    <ImageView
-                        android:id="@+id/iconMath"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_math"
-                        app:tint="@color/text_purple_light" />
-                    <TextView
-                        style="@style/CardText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="16dp"
-                        android:layout_toEndOf="@id/iconMath"
-                        android:text="Math Quiz" />
-                    <RadioButton
-                        android:id="@+id/mathOption"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true" />
-                </RelativeLayout>
+                    android:text="Math Quiz"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    style="@style/CardText"
+                    android:drawableStart="@drawable/ic_math"
+                    android:drawablePadding="16dp"
+                    app:drawableTint="@color/text_purple_light" />
 
-                <RelativeLayout
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/lightOption"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="12dp">
-                    <ImageView
-                        android:id="@+id/iconLight"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_lightbulb"
-                        app:tint="@color/text_purple_light" />
-                    <TextView
-                        style="@style/CardText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="16dp"
-                        android:layout_toEndOf="@id/iconLight"
-                        android:text="Turn On Lights" />
-                    <RadioButton
-                        android:id="@+id/lightOption"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true" />
-                </RelativeLayout>
+                    android:text="Turn On Lights"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    style="@style/CardText"
+                    android:drawableStart="@drawable/ic_lightbulb"
+                    android:drawablePadding="16dp"
+                    app:drawableTint="@color/text_purple_light" />
 
             </RadioGroup>
 
