@@ -1,5 +1,6 @@
 package com.example.sleepshaker;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
@@ -7,6 +8,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,12 +44,19 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
     private LinearLayout luxChallengeLayout;
     private Sensor lightSensor;
     private static final float LUX_THRESHOLD = 500; // Threshold for a "bright" light
+    private int currentAlarmId = -1;
+    private String currentChallengeType;
+    private String currentAlarmMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dismiss);
+        currentAlarmId = getIntent().getIntExtra("ALARM_ITEM_ID", -1);
+        currentChallengeType = getIntent().getStringExtra("CHALLENGE_TYPE");
+        currentAlarmMessage = getIntent().getStringExtra("ALARM_MESSAGE");
 
+        Log.d("DismissActivity", "Started for Alarm ID: " + currentAlarmId);
         // Initialize all layout containers
         shakeChallengeLayout = findViewById(R.id.shakeChallengeLayout);
         mathChallengeLayout = findViewById(R.id.mathChallengeLayout);
@@ -158,8 +167,18 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private void dismissAlarm() {
+        Log.d("DismissActivity", "Dismissing alarm ID: " + currentAlarmId);
+
+        // Stop the specific ringtone service for this alarm
+        Intent stopRingtoneIntent = new Intent(this, RingtonePlayingService.class);
+        stopRingtoneIntent.putExtra("ALARM_ID", currentAlarmId);
+        stopRingtoneIntent.setAction("STOP_ALARM");
+        startService(stopRingtoneIntent);
+
+        // Also try the old way as backup
         stopService(new Intent(this, RingtonePlayingService.class));
-        Toast.makeText(this, "Alarm Dismissed!", Toast.LENGTH_SHORT).show();
+
+        Toast.makeText(this, "Alarm " + currentAlarmId + " Dismissed!", Toast.LENGTH_SHORT).show();
         finish();
     }
 
@@ -178,5 +197,10 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
     protected void onDestroy() {
         super.onDestroy();
         sensorManager.unregisterListener(this);
+    }
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+        Toast.makeText(this, "Please complete the challenge to dismiss the alarm", Toast.LENGTH_SHORT).show();
     }
 }
