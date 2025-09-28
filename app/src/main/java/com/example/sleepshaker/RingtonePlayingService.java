@@ -8,11 +8,13 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.IBinder;
+import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 public class RingtonePlayingService extends Service {
     private Ringtone ringtone;
     public static final int NOTIFICATION_ID = 1;
+    private int currentAlarmId = -1;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -21,9 +23,28 @@ public class RingtonePlayingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null) {
+            String action = intent.getAction();
+            int alarmId = intent.getIntExtra("ALARM_ID", -1);
+
+            // Handle STOP_ALARM action
+            if ("STOP_ALARM".equals(action)) {
+                Log.d("RingtoneService", "Received STOP_ALARM for ID: " + alarmId);
+                if (alarmId == currentAlarmId || alarmId == -1) {
+                    // Stop this specific alarm or stop all if ID is -1
+                    stopSelf();
+                }
+                return START_NOT_STICKY;
+            }
+
+            // Handle starting ringtone
+            currentAlarmId = alarmId;
+            Log.d("RingtoneService", "Starting ringtone for alarm ID: " + alarmId);
+        }
+
         // --- Create Intent to open DismissActivity when notification is tapped ---
         Intent activityIntent = new Intent(this, DismissActivity.class);
-        if (intent.getExtras() != null) {
+        if (intent != null && intent.getExtras() != null) {
             activityIntent.putExtras(intent.getExtras()); // Forward extras
         }
         PendingIntent contentPendingIntent = PendingIntent.getActivity(
@@ -38,7 +59,7 @@ public class RingtonePlayingService extends Service {
         // --- Build the notification ---
         Notification notification = new NotificationCompat.Builder(this, MainActivity.ALARM_CHANNEL_ID)
                 .setContentTitle("WAKE UP!")
-                .setContentText("Tap to dismiss or select a challenge.")
+                .setContentText("Alarm " + currentAlarmId + " - Tap to dismiss or select a challenge.")
                 .setSmallIcon(R.drawable.ic_alarm)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
@@ -49,22 +70,31 @@ public class RingtonePlayingService extends Service {
 
         startForeground(NOTIFICATION_ID, notification);
 
-        // --- Play the ringtone ---
-        Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        if (alarmUri == null) {
-            alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        // --- Play the ringtone (only if not already playing) ---
+        if (ringtone == null || !ringtone.isPlaying()) {
+            Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            if (alarmUri == null) {
+                alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            }
+            this.ringtone = RingtoneManager.getRingtone(this, alarmUri);
+            if (ringtone != null) {
+                ringtone.play();
+                Log.d("RingtoneService", "Ringtone started playing for alarm " + currentAlarmId);
+            }
         }
-        this.ringtone = RingtoneManager.getRingtone(this, alarmUri);
-        ringtone.play();
 
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        Log.d("RingtoneService", "Service destroying - stopping ringtone for alarm " + currentAlarmId);
         if (ringtone != null) {
-            ringtone.stop();
+            if (ringtone.isPlaying()) {
+                ringtone.stop();
+            }
         }
         stopForeground(true);
+        super.onDestroy();
     }
 }

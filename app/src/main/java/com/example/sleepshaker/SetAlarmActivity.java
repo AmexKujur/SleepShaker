@@ -138,7 +138,7 @@ public class SetAlarmActivity extends AppCompatActivity {
         }
 
         AlarmItem alarmItem = new AlarmItem();
-        alarmItem.hour = hour12;
+        alarmItem.hour = hour24;
         alarmItem.minute = minute;
         alarmItem.isEnabled = true;
         alarmItem.repeatDays = selectedDays;

@@ -28,14 +28,30 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         } else {
             // --- Logic to start the alarm ---
-            Log.d("AlarmReceiver", "Alarm is triggering, starting RingtonePlayingService...");
+            int alarmId = intent.getIntExtra("ALARM_ITEM_ID", -1);
+            String challengeType = intent.getStringExtra("CHALLENGE_TYPE");
 
-            // Start the service. The service will handle the notification, sound, and activity launch.
+            Log.d("AlarmReceiver", "=== ALARM TRIGGERED === ID: " + alarmId + " Challenge: " + challengeType);
+
+            // Start the ringtone service for this specific alarm
             Intent serviceIntent = new Intent(context, RingtonePlayingService.class);
+            serviceIntent.putExtra("ALARM_ID", alarmId);
             if (intent.getExtras() != null) {
-                serviceIntent.putExtras(intent.getExtras()); // Forward extras to the service
+                serviceIntent.putExtras(intent.getExtras());
             }
             context.startService(serviceIntent);
+
+            // CRITICAL: Directly launch DismissActivity from here
+            Intent dismissIntent = new Intent(context, DismissActivity.class);
+            dismissIntent.putExtra("ALARM_ITEM_ID", alarmId);
+            dismissIntent.putExtra("CHALLENGE_TYPE", challengeType);
+
+            // CRITICAL: These flags ensure separate activity instances
+            dismissIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+
+            Log.d("AlarmReceiver", "Starting DismissActivity for alarm ID: " + alarmId);
+            context.startActivity(dismissIntent);
         }
     }
 }

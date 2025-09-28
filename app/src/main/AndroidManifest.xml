@@ -30,7 +30,7 @@
         </activity>
 
         <activity android:name=".SetAlarmActivity" />
-        <activity android:name=".DismissActivity" />
+
 
         <receiver
             android:name=".AlarmReceiver"
@@ -41,6 +41,11 @@
             android:name=".RingtonePlayingService"
             android:enabled="true"
             android:foregroundServiceType="mediaPlayback" />
+        <activity
+            android:name=".DismissActivity"
+            android:launchMode="standard"
+            android:excludeFromRecents="true"
+            tools:ignore="DuplicateActivity" />
 
     </application>
 </manifest>
