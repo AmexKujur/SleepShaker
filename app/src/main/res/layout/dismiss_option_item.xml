@@ -20,7 +20,7 @@
         android:id="@+id/optionIcon"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:src="@drawable/ic_vibration"
+        android:src="@drawable/ic_shake"
         app:tint="@android:color/white"
         tools:ignore="ContentDescription" />
 

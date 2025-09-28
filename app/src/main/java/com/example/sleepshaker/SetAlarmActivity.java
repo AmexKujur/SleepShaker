@@ -72,7 +72,7 @@ public class SetAlarmActivity extends AppCompatActivity {
         saveAlarmButton = findViewById(R.id.saveAlarmButton);
         hourPicker.setMinValue(1);
         hourPicker.setMaxValue(12);
-
+        hourPicker.setFormatter(i -> String.format("%02d", i));
         minutePicker.setMinValue(0);
         minutePicker.setMaxValue(59);
         minutePicker.setFormatter(i -> String.format("%02d", i));
@@ -133,7 +133,10 @@ public class SetAlarmActivity extends AppCompatActivity {
             selectedChallenge = "MATH";
         } else if (selectedId == R.id.lightOption) {
             selectedChallenge = "LUX_CHALLENGE";
-        } else {
+        }else if(selectedId == R.id.stepOption){
+            selectedChallenge = "STEP";
+        }
+        else {
             selectedChallenge = "SHAKE";
         }
 

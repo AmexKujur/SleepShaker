@@ -124,5 +124,33 @@
             android:textStyle="bold"
             android:gravity="center_horizontal"/>
     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/stepChallengeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/challengeInstructions"
+        app:layout_constraintVertical_bias="0.4">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_directions_walk"
+            app:tint="@color/white"
+            android:layout_marginBottom="24dp"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/step_counter_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            tools:text="0 / 20 steps" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
