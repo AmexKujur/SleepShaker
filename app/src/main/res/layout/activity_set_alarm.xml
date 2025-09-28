@@ -203,7 +203,7 @@
                     android:checked="true" android:paddingStart="12dp"
                     android:paddingEnd="12dp"
                     style="@style/CardText"
-                    android:drawableStart="@drawable/ic_vibration"
+                    android:drawableStart="@drawable/ic_shake"
                     android:drawablePadding="16dp"
                     app:drawableTint="@color/text_purple_light" />
 
@@ -231,7 +231,20 @@
                     android:drawablePadding="16dp"
                     app:drawableTint="@color/text_purple_light" />
 
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/stepOption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Step Counter"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    style="@style/CardText"
+                    android:drawableStart="@drawable/ic_directions_walk"
+                    android:drawablePadding="16dp"
+                    app:drawableTint="@color/text_purple_light" />
+
             </RadioGroup>
+
 
         </LinearLayout>
     </ScrollView>

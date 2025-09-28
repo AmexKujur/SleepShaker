@@ -44,6 +44,11 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
     private LinearLayout luxChallengeLayout;
     private Sensor lightSensor;
     private static final float LUX_THRESHOLD = 500; // Threshold for a "bright" light
+    private LinearLayout stepChallengeLayout;
+    private TextView stepCounterTextView;
+    private Sensor stepCounterSensor;
+    private int initialSteps = -1; // -1 indicates we haven't received a value yet
+    private static final int TARGET_STEPS = 20;
     private int currentAlarmId = -1;
     private String currentChallengeType;
     private String currentAlarmMessage;
@@ -61,7 +66,7 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
         shakeChallengeLayout = findViewById(R.id.shakeChallengeLayout);
         mathChallengeLayout = findViewById(R.id.mathChallengeLayout);
         luxChallengeLayout = findViewById(R.id.luxChallengeLayout);
-
+        stepChallengeLayout = findViewById(R.id.stepChallengeLayout);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
         String challengeType = getIntent().getStringExtra("CHALLENGE_TYPE");
@@ -76,6 +81,9 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
                 break;
             case "LUX_CHALLENGE":
                 setupLuxChallenge();
+                break;
+            case "STEP":
+                setupStepChallenge();
                 break;
             case "SHAKE":
             default:
@@ -131,10 +139,25 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
         }
         sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
+    private void setupStepChallenge() {
+        stepChallengeLayout.setVisibility(View.VISIBLE);
+        stepCounterTextView = findViewById(R.id.step_counter_textview);
+        stepCounterTextView.setText("0 / " + TARGET_STEPS + " steps");
 
+        stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        if (stepCounterSensor == null) {
+            Toast.makeText(this, "Step sensor not available.", Toast.LENGTH_LONG).show();
+            dismissAlarm();
+            return;
+        }
+        sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+            handleStepEvent(event);
+        }
+        else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             handleShakeEvent(event);
         } else if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
             handleLightEvent(event);
@@ -165,6 +188,27 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
             dismissAlarm();
         }
     }
+        private void handleStepEvent(SensorEvent event) {
+            int totalSteps = (int) event.values[0];
+
+            // If this is the first event, record the initial step count
+            if (initialSteps == -1) {
+                initialSteps = totalSteps;
+            }
+
+            // Calculate steps taken since the alarm started
+            int stepsTaken = totalSteps - initialSteps;
+
+            // Update the UI
+            if (stepsTaken >= 0) {
+                stepCounterTextView.setText(stepsTaken + " / " + TARGET_STEPS + " steps");
+            }
+
+            // Check if the user has reached the target
+            if (stepsTaken >= TARGET_STEPS) {
+                dismissAlarm();
+            }
+        }
 
     private void dismissAlarm() {
         Log.d("DismissActivity", "Dismissing alarm ID: " + currentAlarmId);
