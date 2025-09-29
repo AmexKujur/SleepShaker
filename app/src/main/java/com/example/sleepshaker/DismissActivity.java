@@ -17,6 +17,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.sleepshaker.customviews.LightSensorView;
+import com.example.sleepshaker.customviews.ShakeProgressView;
+import com.example.sleepshaker.customviews.StepCounterView;
+
 import java.util.Random;
 
 public class DismissActivity extends AppCompatActivity implements SensorEventListener {
@@ -45,13 +50,16 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
     private Sensor lightSensor;
     private static final float LUX_THRESHOLD = 500; // Threshold for a "bright" light
     private LinearLayout stepChallengeLayout;
-    private TextView stepCounterTextView;
+    //private TextView stepCounterTextView;
     private Sensor stepCounterSensor;
     private int initialSteps = -1; // -1 indicates we haven't received a value yet
     private static final int TARGET_STEPS = 20;
     private int currentAlarmId = -1;
     private String currentChallengeType;
     private String currentAlarmMessage;
+    private ShakeProgressView customShakeProgressView;
+    private LightSensorView customLightSensorView;
+    private StepCounterView customStepCounterView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +102,8 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
 
     private void setupShakeChallenge() {
         shakeChallengeLayout.setVisibility(View.VISIBLE);
-        shakeProgressBar = findViewById(R.id.shakeProgressBar);
+        //shakeProgressBar = findViewById(R.id.shakeProgressBar);
+        customShakeProgressView = findViewById(R.id.customShakeProgressView);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         acceleration = 10f;
         currentAcceleration = SensorManager.GRAVITY_EARTH;
@@ -131,6 +140,7 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
 
     private void setupLuxChallenge() {
         luxChallengeLayout.setVisibility(View.VISIBLE);
+        customLightSensorView = findViewById(R.id.customLightSensorView);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         if (lightSensor == null) {
             Toast.makeText(this, "Light sensor not available. Dismissing alarm.", Toast.LENGTH_LONG).show();
@@ -141,8 +151,18 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
     }
     private void setupStepChallenge() {
         stepChallengeLayout.setVisibility(View.VISIBLE);
-        stepCounterTextView = findViewById(R.id.step_counter_textview);
-        stepCounterTextView.setText("0 / " + TARGET_STEPS + " steps");
+        //stepCounterTextView = findViewById(R.id.customStepCounterView);
+        customStepCounterView = findViewById(R.id.customStepCounterView);
+        customStepCounterView.setTargetSteps(TARGET_STEPS);
+        //stepCounterTextView.setText("0 / " + TARGET_STEPS + " steps");
+        if (customStepCounterView != null) {
+            customStepCounterView.setTargetSteps(TARGET_STEPS);
+        } else {
+            Log.e("DismissActivity", "customStepCounterView not found in layout");
+            Toast.makeText(this, "Step counter not available.", Toast.LENGTH_LONG).show();
+            dismissAlarm();
+            return;
+        }
 
         stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         if (stepCounterSensor == null) {
@@ -174,17 +194,25 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
         acceleration = acceleration * 0.9f + delta;
 
         if (acceleration > SHAKE_SENSITIVITY) {
+            //shakeProgress += SHAKE_PROGRESS_INCREMENT;
+           // shakeProgressBar.setProgress(shakeProgress);
+            //if (shakeProgress >= 100) {
+            //    dismissAlarm();
             shakeProgress += SHAKE_PROGRESS_INCREMENT;
-            shakeProgressBar.setProgress(shakeProgress);
+            customShakeProgressView.setProgress(shakeProgress);
+            customShakeProgressView.addShakeEffect(); // Add visual shake effect
             if (shakeProgress >= 100) {
                 dismissAlarm();
+
             }
         }
     }
 
     private void handleLightEvent(SensorEvent event) {
         float luxValue = event.values[0];
+        customLightSensorView.updateLux(luxValue);
         if (luxValue > LUX_THRESHOLD) {
+            customLightSensorView.addSuccessAnimation();
             dismissAlarm();
         }
     }
@@ -201,7 +229,7 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
 
             // Update the UI
             if (stepsTaken >= 0) {
-                stepCounterTextView.setText(stepsTaken + " / " + TARGET_STEPS + " steps");
+                customStepCounterView.updateSteps(stepsTaken);
             }
 
             // Check if the user has reached the target
@@ -225,6 +253,7 @@ public class DismissActivity extends AppCompatActivity implements SensorEventLis
         Toast.makeText(this, "Alarm " + currentAlarmId + " Dismissed!", Toast.LENGTH_SHORT).show();
         finish();
     }
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
