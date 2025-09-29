@@ -42,14 +42,12 @@
             android:textSize="28sp"
             android:textStyle="bold" />
 
-        <ProgressBar
-            android:id="@+id/shakeProgressBar"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:max="100"
-            android:progress="0" />
+        <com.example.sleepshaker.customviews.ShakeProgressView
+            android:id="@+id/customShakeProgressView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_centerInParent="true"
+            android:layout_margin="20dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -95,62 +93,73 @@
     <LinearLayout
         android:id="@+id/luxChallengeLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_height="match_parent"
         android:orientation="vertical"
+        android:gravity="center"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/challengeInstructions"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.4">
-
-        <ImageView
-            android:id="@+id/luxIcon"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/ic_lightbulb"
-            app:tint="@color/white"
-            android:layout_marginBottom="24dp"
-            tools:ignore="ContentDescription" />
+        android:padding="20dp"
+        android:background="@android:color/black">
 
         <TextView
-            android:id="@+id/luxInstructionText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Turn on a light or find a bright spot!"
-            android:textColor="@color/white"
-            android:textSize="24sp"
+            android:text="Light Challenge"
+            android:textSize="28sp"
             android:textStyle="bold"
-            android:gravity="center_horizontal"/>
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="10dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Point your phone toward a bright light source"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:textAlignment="center"
+            android:layout_marginBottom="20dp" />
+
+        <!-- REPLACE: Remove any old TextViews, add CustomView -->
+        <com.example.sleepshaker.customviews.LightSensorView
+            android:id="@+id/customLightSensorView"
+            android:layout_width="320dp"
+            android:layout_height="320dp"
+            android:layout_margin="20dp" />
+
     </LinearLayout>
     <LinearLayout
         android:id="@+id/stepChallengeLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_height="match_parent"
         android:orientation="vertical"
+        android:gravity="center"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/challengeInstructions"
-        app:layout_constraintVertical_bias="0.4">
-
-        <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/ic_directions_walk"
-            app:tint="@color/white"
-            android:layout_marginBottom="24dp"
-            tools:ignore="ContentDescription" />
+        android:padding="20dp"
+        android:background="@android:color/white">
 
         <TextView
-            android:id="@+id/step_counter_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+            android:text="Step Challenge"
             android:textSize="28sp"
             android:textStyle="bold"
-            tools:text="0 / 20 steps" />
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="10dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Walk around to dismiss the alarm!"
+            android:textSize="16sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginBottom="20dp" />
+
+        <!-- REPLACE: Remove old TextView, add CustomView -->
+        <com.example.sleepshaker.customviews.StepCounterView
+            android:id="@+id/customStepCounterView"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_margin="10dp" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
